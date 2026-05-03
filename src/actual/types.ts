@@ -17,6 +17,7 @@ export type BudgetTransaction = {
   accountId: string;
   amount: number;
   categoryId?: string | null | undefined;
+  transferId?: string | null | undefined;
   date: string;
   payeeName?: string | null | undefined;
   importedPayee?: string | null | undefined;

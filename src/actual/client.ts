@@ -119,6 +119,7 @@ function mapTransaction(
     accountId: toOptionalString(raw["account"]) ?? accountId,
     amount: toNumber(raw["amount"]),
     categoryId: toOptionalString(raw["category"]),
+    transferId: toOptionalString(raw["transfer_id"]),
     date: toString(raw["date"]),
     payeeName: payeeId ? (payees.get(payeeId) ?? payeeId) : undefined,
     importedPayee: toOptionalString(raw["imported_payee"]),

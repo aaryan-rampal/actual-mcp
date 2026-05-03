@@ -10,6 +10,10 @@ import type {
 const UNCATEGORIZED_ID = "uncategorized";
 const UNCATEGORIZED_NAME = "Uncategorized";
 
+function isTransfer(transaction: BudgetTransaction): boolean {
+  return transaction.transferId != null;
+}
+
 export function filterTransactions(
   transactions: BudgetTransaction[],
   filter: TransactionFilter,
@@ -32,7 +36,7 @@ export function buildCategoryBreakdown(
   const totals = new Map<string, CategoryBreakdownItem>();
 
   for (const transaction of transactions) {
-    if (transaction.amount >= 0) {
+    if (transaction.amount >= 0 || isTransfer(transaction)) {
       continue;
     }
 
@@ -68,10 +72,10 @@ export function summarizeMonth(
   });
 
   const income = monthTransactions
-    .filter((transaction) => transaction.amount > 0)
+    .filter((transaction) => transaction.amount > 0 && !isTransfer(transaction))
     .reduce((total, transaction) => total + transaction.amount, 0);
   const expenses = monthTransactions
-    .filter((transaction) => transaction.amount < 0)
+    .filter((transaction) => transaction.amount < 0 && !isTransfer(transaction))
     .reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
 
   return {
