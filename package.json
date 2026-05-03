@@ -1,0 +1,36 @@
+{
+  "name": "actual-budget-mcp",
+  "version": "0.1.0",
+  "description": "Read-only stdio MCP server for Actual Budget analysis.",
+  "bin": {
+    "actual-budget-mcp": "./dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit false",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "oxlint .",
+    "format": "oxfmt --write .",
+    "test": "vitest run src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@actual-app/api": "26.4.0",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "dotenv": "17.4.2",
+    "zod": "4.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "oxfmt": "0.47.0",
+    "oxlint": "1.62.0",
+    "tsx": "4.21.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.33.2"
+}

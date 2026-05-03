@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.actual-data/
+coverage/
+.mcp.json
+.codex/
+logs/
+/docs/superpowers/specs/2026-05-02-actual-budget-mcp-design.md
