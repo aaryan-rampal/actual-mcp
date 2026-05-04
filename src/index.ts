@@ -7,6 +7,7 @@ import { logError, logInfo } from "./logger.js";
 import { createMcpServer } from "./mcp/server.js";
 
 async function main(): Promise<void> {
+  hideProtocolNoiseFromStdout();
   const config = loadConfig();
   logInfo(`Starting Actual Budget MCP for ${config.actualServerUrl}`);
   const actual = new ActualBudgetClient(config);
@@ -37,6 +38,36 @@ async function shutdown(
   await server.close();
   await actual.shutdown();
   process.exit(0);
+}
+
+function hideProtocolNoiseFromStdout(): () => void {
+  const write = process.stdout.write;
+
+  process.stdout.write = (
+    chunk: string | Uint8Array<ArrayBufferLike>,
+    encodingOrCallback?: BufferEncoding | null | ((error?: Error | null | undefined) => void),
+    callback?: (error?: Error | null | undefined) => void,
+  ): boolean => {
+    const message = typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+
+    if (message.includes("[Breadcrumb]")) {
+      process.stderr.write(message);
+      return true;
+    }
+
+    const actualCallback =
+      typeof encodingOrCallback === "function" ? encodingOrCallback : callback;
+    const actualEncoding =
+      typeof encodingOrCallback === "string"
+        ? encodingOrCallback
+        : undefined;
+
+    return write.call(process.stdout, chunk, actualEncoding, actualCallback);
+  };
+
+  return () => {
+    process.stdout.write = write;
+  };
 }
 
 main().catch((error: unknown) => {

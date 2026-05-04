@@ -12,6 +12,7 @@ import type {
 import type { AppConfig } from "../config.js";
 
 type ActualApi = typeof actualApi;
+type ActualInitConfig = Parameters<ActualApi["init"]>[0] & { verbose: boolean };
 type RawRecord = Record<string, unknown>;
 
 export class ActualBudgetClient {
@@ -27,11 +28,14 @@ export class ActualBudgetClient {
   public async initialize(): Promise<void> {
     await mkdir(this.config.actualDataDir, { recursive: true });
 
-    await this.api.init({
+    const initConfig: ActualInitConfig = {
       dataDir: this.config.actualDataDir,
       serverURL: this.config.actualServerUrl,
       password: this.config.actualPassword,
-    });
+      verbose: false,
+    };
+
+    await this.api.init(initConfig);
 
     try {
       if (this.config.actualE2ePassword) {
