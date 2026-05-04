@@ -173,6 +173,10 @@ function toMilliunits(value: unknown): number {
   return Math.round(toNumber(value)) / 1000;
 }
 
+function toCentiunits(value: unknown): number {
+  return Math.round(toNumber(value)) / 100;
+}
+
 function toBoolean(value: unknown): boolean {
   return value === true;
 }
@@ -182,11 +186,11 @@ function mapBudgetMonth(raw: RawRecord): BudgetMonth {
 
   return {
     month: toString(raw["month"]),
-    toBudget: toMilliunits(raw["toBudget"]),
-    totalIncome: toMilliunits(raw["totalIncome"]),
-    totalBudgeted: toMilliunits(raw["totalBudgeted"]),
-    totalSpent: toMilliunits(raw["totalSpent"]),
-    totalBalance: toMilliunits(raw["totalBalance"]),
+    toBudget: toCentiunits(raw["toBudget"]),
+    totalIncome: toCentiunits(raw["totalIncome"]),
+    totalBudgeted: toCentiunits(raw["totalBudgeted"]),
+    totalSpent: toCentiunits(raw["totalSpent"]),
+    totalBalance: toCentiunits(raw["totalBalance"]),
     categoryGroups: groups.filter((g) => !toBoolean(g["is_income"])).map(mapCategoryGroupBudget),
   };
 }
@@ -197,9 +201,9 @@ function mapCategoryGroupBudget(raw: RawRecord): BudgetCategoryGroup {
   return {
     id: toString(raw["id"]),
     name: toString(raw["name"]),
-    budgeted: toMilliunits(raw["budgeted"]),
-    spent: toMilliunits(raw["spent"]),
-    balance: toMilliunits(raw["balance"]),
+    budgeted: toCentiunits(raw["budgeted"]),
+    spent: toCentiunits(raw["spent"]),
+    balance: toCentiunits(raw["balance"]),
     categories: cats.map(mapCategoryBudget),
   };
 }
@@ -208,9 +212,9 @@ function mapCategoryBudget(raw: RawRecord): BudgetCategory_Item {
   return {
     id: toString(raw["id"]),
     name: toString(raw["name"]),
-    budgeted: toMilliunits(raw["budgeted"]),
-    spent: toMilliunits(raw["spent"]),
-    balance: toMilliunits(raw["balance"]),
+    budgeted: toCentiunits(raw["budgeted"]),
+    spent: toCentiunits(raw["spent"]),
+    balance: toCentiunits(raw["balance"]),
     carryover: toBoolean(raw["carryover"]),
   };
 }
