@@ -110,6 +110,21 @@ export function createMcpServer(options: ServerOptions): McpServer {
     async (input) => toToolResult(await handlers.findLargeTransactions(input)),
   );
 
+  server.registerTool(
+    "get_budget_months",
+    {
+      title: "Get Budget Months",
+      description:
+        "Return budget plan data for a contiguous range of months: budgeted, spent, and balance per category.",
+      inputSchema: {
+        start: z.string().describe("First month in YYYY-MM format (inclusive)."),
+        end: z.string().describe("Last month in YYYY-MM format (inclusive)."),
+      },
+      annotations,
+    },
+    async (input) => toToolResult(await handlers.getBudgetMonths(input)),
+  );
+
   return server;
 }
 

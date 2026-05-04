@@ -33,6 +33,34 @@ export type BudgetTransaction = {
   notes?: string | null | undefined;
 };
 
+export type BudgetCategory_Item = {
+  id: string;
+  name: string;
+  budgeted: number;
+  spent: number;
+  balance: number;
+  carryover: boolean;
+};
+
+export type BudgetCategoryGroup = {
+  id: string;
+  name: string;
+  budgeted: number;
+  spent: number;
+  balance: number;
+  categories: BudgetCategory_Item[];
+};
+
+export type BudgetMonth = {
+  month: string;
+  toBudget: number;
+  totalIncome: number;
+  totalBudgeted: number;
+  totalSpent: number;
+  totalBalance: number;
+  categoryGroups: BudgetCategoryGroup[];
+};
+
 export type CategoryLookup = Map<string, string>;
 
 export type TransactionFilter = {

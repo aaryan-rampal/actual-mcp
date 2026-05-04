@@ -1,6 +1,14 @@
 import { mkdir } from "node:fs/promises";
 import * as actualApi from "@actual-app/api";
-import type { BudgetAccount, BudgetCategory, BudgetTransaction, SplitTransaction } from "./types.js";
+import type {
+  BudgetAccount,
+  BudgetCategory,
+  BudgetCategoryGroup,
+  BudgetCategory_Item,
+  BudgetMonth,
+  BudgetTransaction,
+  SplitTransaction,
+} from "./types.js";
 import type { AppConfig } from "../config.js";
 
 type ActualApi = typeof actualApi;
@@ -74,6 +82,11 @@ export class ActualBudgetClient {
     }
 
     return transactions;
+  }
+
+  public async getBudgetMonth(month: string): Promise<BudgetMonth> {
+    const raw = (await this.api.getBudgetMonth(month)) as RawRecord;
+    return mapBudgetMonth(raw);
   }
 
   private async getPayeeLookup(): Promise<Map<string, string>> {
@@ -162,6 +175,44 @@ function toMilliunits(value: unknown): number {
 
 function toBoolean(value: unknown): boolean {
   return value === true;
+}
+
+function mapBudgetMonth(raw: RawRecord): BudgetMonth {
+  const groups = Array.isArray(raw["categoryGroups"]) ? (raw["categoryGroups"] as RawRecord[]) : [];
+
+  return {
+    month: toString(raw["month"]),
+    toBudget: toMilliunits(raw["toBudget"]),
+    totalIncome: toMilliunits(raw["totalIncome"]),
+    totalBudgeted: toMilliunits(raw["totalBudgeted"]),
+    totalSpent: toMilliunits(raw["totalSpent"]),
+    totalBalance: toMilliunits(raw["totalBalance"]),
+    categoryGroups: groups.filter((g) => !toBoolean(g["is_income"])).map(mapCategoryGroupBudget),
+  };
+}
+
+function mapCategoryGroupBudget(raw: RawRecord): BudgetCategoryGroup {
+  const cats = Array.isArray(raw["categories"]) ? (raw["categories"] as RawRecord[]) : [];
+
+  return {
+    id: toString(raw["id"]),
+    name: toString(raw["name"]),
+    budgeted: toMilliunits(raw["budgeted"]),
+    spent: toMilliunits(raw["spent"]),
+    balance: toMilliunits(raw["balance"]),
+    categories: cats.map(mapCategoryBudget),
+  };
+}
+
+function mapCategoryBudget(raw: RawRecord): BudgetCategory_Item {
+  return {
+    id: toString(raw["id"]),
+    name: toString(raw["name"]),
+    budgeted: toMilliunits(raw["budgeted"]),
+    spent: toMilliunits(raw["spent"]),
+    balance: toMilliunits(raw["balance"]),
+    carryover: toBoolean(raw["carryover"]),
+  };
 }
 
 function formatCause(error: unknown): string {

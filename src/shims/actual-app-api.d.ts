@@ -22,4 +22,8 @@ declare module "@actual-app/api" {
     startDate: string,
     endDate: string,
   ): Promise<unknown[]>;
+
+  export function getBudgetMonth(month: string): Promise<unknown>;
+
+  export function getBudgetMonths(): Promise<unknown[]>;
 }
