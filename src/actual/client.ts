@@ -1,6 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import * as actualApi from "@actual-app/api";
-import type { BudgetAccount, BudgetCategory, BudgetTransaction } from "./types.js";
+import type { BudgetAccount, BudgetCategory, BudgetTransaction, SplitTransaction } from "./types.js";
 import type { AppConfig } from "../config.js";
 
 type ActualApi = typeof actualApi;
@@ -114,12 +114,25 @@ function mapTransaction(
 ): BudgetTransaction {
   const payeeId = toOptionalString(raw["payee"]);
 
+  const rawSubs = Array.isArray(raw["subtransactions"]) ? raw["subtransactions"] : [];
+  const subtransactions: SplitTransaction[] = rawSubs.map((sub) => {
+    const s = sub as RawRecord;
+    return {
+      id: toString(s["id"]),
+      amount: toMilliunits(s["amount"]),
+      categoryId: toOptionalString(s["category"]),
+      notes: toOptionalString(s["notes"]),
+    };
+  });
+
   return {
     id: toString(raw["id"]),
     accountId: toOptionalString(raw["account"]) ?? accountId,
-    amount: toNumber(raw["amount"]),
+    amount: toMilliunits(raw["amount"]),
     categoryId: toOptionalString(raw["category"]),
     transferId: toOptionalString(raw["transfer_id"]),
+    isParent: toBoolean(raw["is_parent"]),
+    subtransactions: subtransactions.length > 0 ? subtransactions : undefined,
     date: toString(raw["date"]),
     payeeName: payeeId ? (payees.get(payeeId) ?? payeeId) : undefined,
     importedPayee: toOptionalString(raw["imported_payee"]),
@@ -141,6 +154,10 @@ function toOptionalString(value: unknown): string | undefined {
 
 function toNumber(value: unknown): number {
   return typeof value === "number" ? value : Number(value ?? 0);
+}
+
+function toMilliunits(value: unknown): number {
+  return Math.round(toNumber(value)) / 1000;
 }
 
 function toBoolean(value: unknown): boolean {

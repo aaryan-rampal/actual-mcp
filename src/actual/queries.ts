@@ -14,6 +14,14 @@ function isTransfer(transaction: BudgetTransaction): boolean {
   return transaction.transferId != null;
 }
 
+function isSplitParent(transaction: BudgetTransaction): boolean {
+  return transaction.isParent === true;
+}
+
+function isCountable(transaction: BudgetTransaction): boolean {
+  return !isTransfer(transaction) && !isSplitParent(transaction);
+}
+
 export function filterTransactions(
   transactions: BudgetTransaction[],
   filter: TransactionFilter,
@@ -21,7 +29,11 @@ export function filterTransactions(
   const filtered = transactions.filter((transaction) => {
     const inDateRange = transaction.date >= filter.start && transaction.date <= filter.end;
     const inAccount = !filter.accountId || transaction.accountId === filter.accountId;
-    const inCategory = !filter.categoryId || transaction.categoryId === filter.categoryId;
+    const inCategory =
+      !filter.categoryId ||
+      (filter.categoryId === UNCATEGORIZED_ID
+        ? transaction.categoryId == null && !isSplitParent(transaction) && !isTransfer(transaction)
+        : transaction.categoryId === filter.categoryId);
 
     return inDateRange && inAccount && inCategory;
   });
@@ -36,7 +48,7 @@ export function buildCategoryBreakdown(
   const totals = new Map<string, CategoryBreakdownItem>();
 
   for (const transaction of transactions) {
-    if (transaction.amount >= 0 || isTransfer(transaction)) {
+    if (transaction.amount >= 0 || !isCountable(transaction)) {
       continue;
     }
 
@@ -71,11 +83,13 @@ export function summarizeMonth(
     end: `${month}-31`,
   });
 
-  const income = monthTransactions
-    .filter((transaction) => transaction.amount > 0 && !isTransfer(transaction))
+  const countableTransactions = monthTransactions.filter(isCountable);
+
+  const income = countableTransactions
+    .filter((transaction) => transaction.amount > 0)
     .reduce((total, transaction) => total + transaction.amount, 0);
-  const expenses = monthTransactions
-    .filter((transaction) => transaction.amount < 0 && !isTransfer(transaction))
+  const expenses = countableTransactions
+    .filter((transaction) => transaction.amount < 0)
     .reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
 
   return {
@@ -83,7 +97,7 @@ export function summarizeMonth(
     income,
     expenses,
     net: income - expenses,
-    transactionCount: monthTransactions.length,
+    transactionCount: countableTransactions.length,
     categoryBreakdown: buildCategoryBreakdown(monthTransactions, categories),
   };
 }

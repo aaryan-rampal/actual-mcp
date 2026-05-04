@@ -12,12 +12,21 @@ export type BudgetCategory = {
   groupName?: string | undefined;
 };
 
+export type SplitTransaction = {
+  id: string;
+  amount: number;
+  categoryId?: string | null | undefined;
+  notes?: string | null | undefined;
+};
+
 export type BudgetTransaction = {
   id: string;
   accountId: string;
   amount: number;
   categoryId?: string | null | undefined;
   transferId?: string | null | undefined;
+  isParent?: boolean | undefined;
+  subtransactions?: SplitTransaction[] | undefined;
   date: string;
   payeeName?: string | null | undefined;
   importedPayee?: string | null | undefined;
